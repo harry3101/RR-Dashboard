@@ -1,0 +1,16 @@
+.vercel
+__pycache__/
+*.pyc
+outputs/
+ball_by_ball.csv
+competition_team_player_mapping.csv
+competitions.csv
+matches.csv
+playing_eleven.csv
+teams.csv
+*.pdf
+build_*.py
+pressure_analysis.py
+ipl2027_eligibility.py
+recent_form.py
+vercel-deploy/

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RR Pressure Board</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink:#EA1F63; --navy:#0B1F3A; --gold:#F2C14E; --ink:#101826; --fog:#8a93a3;
+  --card:#ffffffee; --line:rgba(11,31,58,.10);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:Outfit,system-ui,sans-serif; color:var(--ink);
+  background:
+    radial-gradient(900px 420px at 0% -10%, rgba(234,31,99,.28), transparent 60%),
+    radial-gradient(700px 380px at 100% 0%, rgba(11,31,58,.25), transparent 55%),
+    linear-gradient(160deg,#f6f3f7 0%, #eef2f8 50%, #f8f1f5 100%);
+}
+.top{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:18px 24px; background:linear-gradient(120deg,#0B1F3A 0%,#1a3358 55%,#4a1230 100%);
+  border-bottom:4px solid var(--pink); color:#fff;
+}
+.brand{display:flex; align-items:center; gap:14px}
+.brand img{width:78px;height:78px;object-fit:contain;background:#fff;border-radius:14px;padding:6px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.35))}
+.brand h1{margin:0;font-size:22px;letter-spacing:.02em}
+.brand p{margin:2px 0 0;opacity:.8;font-size:12px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.chip{font-size:11px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px}
+.controls{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px;
+}
+@media(max-width:900px){.controls{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:11px;color:var(--fog);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em}
+select{
+  width:100%; appearance:none; border:1px solid var(--line); background:var(--card);
+  border-radius:12px; padding:11px 12px; font:inherit; font-weight:600; color:var(--navy);
+  box-shadow:0 8px 20px rgba(11,31,58,.05);
+}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{
+  background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px;
+  box-shadow:0 12px 30px rgba(11,31,58,.06);
+}
+.panel h2{margin:0 0 10px;font-size:15px;color:var(--navy)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:14px}
+.card{
+  border:1px solid var(--line); border-radius:16px; padding:12px; background:#fff;
+  cursor:pointer; transition:.15s transform,.15s box-shadow,.15s border-color;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(11,31,58,.1)}
+.card.on{border-color:var(--pink); box-shadow:0 0 0 2px rgba(234,31,99,.16)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.avatar{
+  width:42px;height:42px;border-radius:50%; display:grid; place-items:center;
+  font-weight:800; color:#fff; background:linear-gradient(135deg,var(--navy),var(--pink));
+}
+.name{font-weight:800;font-size:14px;margin:0}
+.sub{font-size:11px;color:var(--fog);margin-top:2px}
+.score{font-size:20px;font-weight:800;color:var(--pink)}
+.score.b{color:var(--navy)}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;font-weight:700;padding:3px 7px;border-radius:999px;background:#f3f5f9;color:var(--navy)}
+.tag.rel{background:#ffe6f0;color:var(--pink)}
+.tag.os{background:#e8eef8}
+.bars{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.barbox{background:#f5f7fb;border-radius:10px;padding:7px}
+.barbox b{display:block;font-size:13px}
+.barbox span{font-size:10px;color:var(--fog);text-transform:uppercase;letter-spacing:.05em}
+.meter{height:6px;border-radius:99px;background:#e7ebf2;overflow:hidden;margin-top:6px}
+.meter > i{display:block;height:100%;background:linear-gradient(90deg,var(--navy),var(--pink))}
+.focus{
+  margin-top:14px;border-radius:16px;padding:14px;
+  background:linear-gradient(120deg,#0B1F3A,#3a1230); color:#fff;
+  display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center;
+}
+.focus .big{font-size:28px;font-weight:800}
+.focus .muted{opacity:.75;font-size:12px}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}
+.kpi div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;min-width:72px}
+.kpi b{display:block;font-size:16px}
+.kpi span{font-size:10px;opacity:.7;text-transform:uppercase}
+footer{text-align:center;color:var(--fog);font-size:11px;padding:8px 0 24px}
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="rr_logo.png" alt="RR" />
+      <div>
+        <h1>HALLA BOL • Pressure Board</h1>
+        <p>IPL 2027 auction targets • clutch + recent form</p>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="chip">₹27.05 Cr</div>
+      <div class="chip">6 slots · 3 OS</div>
+      <div class="chip">867 matches</div>
+      <div class="chip">Form blended 38%</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="controls">
+      <div>
+        <label for="role">Role</label>
+        <select id="role">
+          <option value="Batter">Batters</option>
+          <option value="Bowler">Bowlers</option>
+        </select>
+      </div>
+      <div>
+        <label for="pool">Pool</label>
+        <select id="pool">
+          <option value="all">All available</option>
+          <option value="released">Released only</option>
+          <option value="open">Open market</option>
+        </select>
+      </div>
+      <div>
+        <label for="cap">Cap status</label>
+        <select id="cap">
+          <option value="all">Indian + Overseas</option>
+          <option value="indian">Indian only</option>
+          <option value="overseas">Overseas only</option>
+        </select>
+      </div>
+      <div>
+        <label for="sort">Sort by</label>
+        <select id="sort">
+          <option value="rating">Final rating</option>
+          <option value="form">Recent form</option>
+          <option value="pressure">Pressure index</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Pressure heat by over</h2>
+        <canvas id="overChart" height="150"></canvas>
+      </div>
+      <div class="panel">
+        <h2 id="chartTitle">Top ratings</h2>
+        <canvas id="rankChart" height="150"></canvas>
+      </div>
+    </div>
+
+    <div class="focus" id="focus">
+      <div class="avatar" id="fAvatar" style="width:58px;height:58px;font-size:18px">RR</div>
+      <div>
+        <div class="big" id="fName">—</div>
+        <div class="muted" id="fSub">Select a card</div>
+      </div>
+      <div class="kpi" id="fKpis"></div>
+    </div>
+
+    <div class="cards" id="cards"></div>
+  </main>
+  <footer>Rajasthan Royals visual board · PDF carries full methodology</footer>
+
+<script>
+const bats = [{"rank": 1, "name": "Reeza Hendricks", "role": "Batter", "rating": 83.6, "pressure": 94.7, "form": 65.6, "sr_p": 195.7, "sr_n": 138.9, "lift": 56.8, "avg": 45.4, "balls": 116, "released": false, "overseas": true, "initials": "RH"}, {"rank": 2, "name": "Rassie van der Dussen", "role": "Batter", "rating": 82.4, "pressure": 95.1, "form": 61.7, "sr_p": 177.5, "sr_n": 103.2, "lift": 74.3, "avg": 52.7, "balls": 89, "released": false, "overseas": true, "initials": "RV"}, {"rank": 3, "name": "Nitish Rana", "role": "Batter", "rating": 81.5, "pressure": 100.0, "form": 51.3, "sr_p": 171.3, "sr_n": 140.5, "lift": 30.9, "avg": 35.0, "balls": 143, "released": true, "overseas": false, "initials": "NR"}, {"rank": 4, "name": "Sikandar Raza", "role": "Batter", "rating": 81.5, "pressure": 89.7, "form": 68.2, "sr_p": 185.2, "sr_n": 125.3, "lift": 59.9, "avg": 26.1, "balls": 169, "released": false, "overseas": true, "initials": "SR"}, {"rank": 5, "name": "Asif Khan", "role": "Batter", "rating": 78.2, "pressure": 87.6, "form": 63.0, "sr_p": 196.8, "sr_n": 112.1, "lift": 84.6, "avg": 30.5, "balls": 93, "released": false, "overseas": true, "initials": "AK"}, {"rank": 6, "name": "Towhid Hridoy", "role": "Batter", "rating": 77.1, "pressure": 83.4, "form": 66.8, "sr_p": 152.7, "sr_n": 120.7, "lift": 32.0, "avg": 84.0, "balls": 165, "released": false, "overseas": true, "initials": "TH"}, {"rank": 7, "name": "Shimron Hetmyer", "role": "Batter", "rating": 75.9, "pressure": 73.0, "form": 80.7, "sr_p": 162.9, "sr_n": 147.5, "lift": 15.3, "avg": 19.7, "balls": 350, "released": true, "overseas": true, "initials": "SH"}, {"rank": 8, "name": "Glenn Maxwell", "role": "Batter", "rating": 73.6, "pressure": 91.1, "form": 45.2, "sr_p": 189.5, "sr_n": 156.6, "lift": 32.8, "avg": 36.0, "balls": 133, "released": false, "overseas": true, "initials": "GM"}, {"rank": 9, "name": "Vijay Shankar", "role": "Batter", "rating": 71.6, "pressure": 94.1, "form": 35.0, "sr_p": 173.7, "sr_n": 117.8, "lift": 55.9, "avg": 33.0, "balls": 114, "released": false, "overseas": false, "initials": "VS"}, {"rank": 10, "name": "Jaker Ali Anik", "role": "Batter", "rating": 70.3, "pressure": 77.6, "form": 58.4, "sr_p": 179.3, "sr_n": 110.5, "lift": 68.8, "avg": 26.9, "balls": 135, "released": false, "overseas": true, "initials": "JA"}];
+const bowls = [{"rank": 1, "name": "Gerald Coetzee", "role": "Bowler", "rating": 83.9, "pressure": 94.0, "form": 67.6, "econ_p": 7.95, "econ_n": 9.99, "lift": 2.04, "wkts": 12, "balls": 114, "released": true, "overseas": true, "initials": "GC"}, {"rank": 2, "name": "Akash Madhwal", "role": "Bowler", "rating": 75.3, "pressure": 100.0, "form": 35.0, "econ_p": 8.08, "econ_n": 10.72, "lift": 2.64, "wkts": 9, "balls": 95, "released": true, "overseas": false, "initials": "AM"}, {"rank": 3, "name": "Matheesha Pathirana", "role": "Bowler", "rating": 67.4, "pressure": 79.4, "form": 48.0, "econ_p": 8.46, "econ_n": 9.02, "lift": 0.56, "wkts": 39, "balls": 426, "released": true, "overseas": true, "initials": "MP"}, {"rank": 4, "name": "Michael Bracewell", "role": "Bowler", "rating": 66.4, "pressure": 70.8, "form": 59.1, "econ_p": 7.22, "econ_n": 8.05, "lift": 0.82, "wkts": 8, "balls": 98, "released": false, "overseas": true, "initials": "MB"}, {"rank": 5, "name": "Zakary Foulkes", "role": "Bowler", "rating": 65.3, "pressure": 70.0, "form": 57.8, "econ_p": 8.39, "econ_n": 9.68, "lift": 1.3, "wkts": 8, "balls": 83, "released": true, "overseas": true, "initials": "ZF"}, {"rank": 6, "name": "Maheesh Theekshana", "role": "Bowler", "rating": 64.1, "pressure": 65.3, "form": 62.3, "econ_p": 7.68, "econ_n": 7.79, "lift": 0.11, "wkts": 26, "balls": 383, "released": false, "overseas": true, "initials": "MT"}, {"rank": 7, "name": "Sean Abbott", "role": "Bowler", "rating": 60.7, "pressure": 61.4, "form": 59.7, "econ_p": 8.86, "econ_n": 10.05, "lift": 1.19, "wkts": 13, "balls": 109, "released": false, "overseas": true, "initials": "SA"}, {"rank": 8, "name": "Lockie Ferguson", "role": "Bowler", "rating": 60.1, "pressure": 60.0, "form": 60.4, "econ_p": 8.63, "econ_n": 8.91, "lift": 0.28, "wkts": 17, "balls": 294, "released": true, "overseas": true, "initials": "LF"}, {"rank": 9, "name": "Ottneil Baartman", "role": "Bowler", "rating": 59.4, "pressure": 60.0, "form": 58.4, "econ_p": 8.22, "econ_n": 9.57, "lift": 1.35, "wkts": 7, "balls": 81, "released": false, "overseas": true, "initials": "OB"}, {"rank": 10, "name": "Adam Zampa", "role": "Bowler", "rating": 58.9, "pressure": 55.1, "form": 65.0, "econ_p": 8.53, "econ_n": 8.34, "lift": -0.19, "wkts": 18, "balls": 187, "released": false, "overseas": true, "initials": "AZ"}];
+let active = bats[0];
+
+const overChart = new Chart(document.getElementById('overChart'), {
+  type:'bar',
+  data:{ labels:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], datasets:[{ data:[3.8, 4.3, 4.5, 4.8, 5.1, 5.7, 1.2, 1.3, 1.5, 2.0, 2.6, 3.8, 28.0, 29.0, 30.0, 48.0, 59.9, 62.9, 66.2, 70.5], backgroundColor:["#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#0B1F3A", "#F2C14E", "#F2C14E", "#F2C14E", "#EA1F63", "#EA1F63", "#EA1F63", "#EA1F63", "#EA1F63"], borderRadius:8 }] },
+  options:{ plugins:{legend:{display:false}}, scales:{ y:{ ticks:{ callback:v=>v+'%' } }, x:{ grid:{display:false} } } }
+});
+
+let rankChart = new Chart(document.getElementById('rankChart'), {
+  type:'bar',
+  data:{ labels:[], datasets:[{ data:[], backgroundColor:'#EA1F63', borderRadius:8 }] },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{ x:{ beginAtZero:true, max:100 }, y:{ grid:{display:false} } }
+  }
+});
+
+function filtered() {
+  const role = document.getElementById('role').value;
+  const pool = document.getElementById('pool').value;
+  const cap = document.getElementById('cap').value;
+  const sort = document.getElementById('sort').value;
+  let list = (role === 'Batter' ? bats : bowls).slice();
+  if (pool === 'released') list = list.filter(p => p.released);
+  if (pool === 'open') list = list.filter(p => !p.released);
+  if (cap === 'indian') list = list.filter(p => !p.overseas);
+  if (cap === 'overseas') list = list.filter(p => p.overseas);
+  list.sort((a,b) => b[sort] - a[sort]);
+  return { role, list };
+}
+
+function paint() {
+  const { role, list } = filtered();
+  const mount = document.getElementById('cards');
+  if (!list.length) {
+    mount.innerHTML = '<div class="panel">No players for these filters.</div>';
+    return;
+  }
+  rankChart.data.labels = list.map(p => p.name.split(' ').slice(-1)[0]);
+  rankChart.data.datasets[0].data = list.map(p => p.rating);
+  rankChart.data.datasets[0].backgroundColor = role === 'Batter' ? '#0B1F3A' : '#EA1F63';
+  rankChart.update();
+  document.getElementById('chartTitle').textContent = role + ' ratings';
+
+  mount.innerHTML = list.map((p,i) => `
+    <div class="card ${active && active.name===p.name ? 'on':''}" data-i="${i}">
+      <div class="row">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="avatar">${p.initials}</div>
+          <div>
+            <p class="name">#${p.rank} ${p.name}</p>
+            <div class="sub">${p.role}</div>
+          </div>
+        </div>
+        <div class="score ${role==='Batter'?'b':''}">${p.rating}</div>
+      </div>
+      <div class="tags">
+        ${p.released ? '<span class="tag rel">Released</span>' : '<span class="tag">Open</span>'}
+        <span class="tag ${p.overseas?'os':''}">${p.overseas?'Overseas':'Indian'}</span>
+      </div>
+      <div class="bars">
+        <div class="barbox"><b>${p.pressure}</b><span>Pressure</span><div class="meter"><i style="width:${Math.min(100,p.pressure)}%"></i></div></div>
+        <div class="barbox"><b>${p.form}</b><span>Form</span><div class="meter"><i style="width:${Math.min(100,p.form)}%"></i></div></div>
+      </div>
+    </div>`).join('');
+
+  [...mount.querySelectorAll('.card')].forEach(el => el.onclick = () => {
+    active = list[+el.dataset.i];
+    focus(active);
+    paint();
+  });
+  if (!list.find(p => active && p.name === active.name)) active = list[0];
+  focus(active);
+}
+
+function focus(p) {
+  document.getElementById('fAvatar').textContent = p.initials;
+  document.getElementById('fName').textContent = `#${p.rank}  ${p.name}`;
+  document.getElementById('fSub').textContent = `${p.role} · rating ${p.rating} · form ${p.form}`;
+  const k = document.getElementById('fKpis');
+  if (p.role === 'Batter') {
+    k.innerHTML = `
+      <div><b>${p.sr_p}</b><span>P-SR</span></div>
+      <div><b>${p.sr_n}</b><span>N-SR</span></div>
+      <div><b>${p.lift>=0?'+':''}${p.lift}</b><span>Lift</span></div>
+      <div><b>${p.avg}</b><span>P-Avg</span></div>
+      <div><b>${p.balls}</b><span>Balls</span></div>`;
+  } else {
+    k.innerHTML = `
+      <div><b>${p.econ_p}</b><span>P-Econ</span></div>
+      <div><b>${p.econ_n}</b><span>N-Econ</span></div>
+      <div><b>${p.lift>=0?'+':''}${p.lift}</b><span>Lift</span></div>
+      <div><b>${p.wkts}</b><span>Wkts</span></div>
+      <div><b>${p.balls}</b><span>Balls</span></div>`;
+  }
+}
+
+['role','pool','cap','sort'].forEach(id => document.getElementById(id).onchange = paint);
+paint();
+</script>
+</body>
+</html>
